@@ -21,6 +21,7 @@ const rol = require('./modules/rol/rutas')
 const subcategorias = require('./modules/subcategorias/rutas')
 const tipo_criterio = require('./modules/tipo_criterio/rutas')
 const autenticacion = require('./modules/autenticacion/rutas')
+const tipo_evaluacion = require('./modules/tipo_evaluacion/rutas') 
 
 const error = require('./red/errors')
 
@@ -55,6 +56,7 @@ app.use('/api/rol', rol)
 app.use('/api/subcategorias', subcategorias)
 app.use('/api/tipo_criterio', tipo_criterio)
 app.use('/api/autenticacion', autenticacion)
+app.use('/api/tipo_evaluacion', tipo_evaluacion)
 
 
 

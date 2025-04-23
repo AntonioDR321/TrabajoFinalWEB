@@ -45,7 +45,7 @@ async function Add(req, res, next) {
 
 async function Delete(req, res, next) {
   try{
-    const todos = await controlador.delete(req.body)
+    const todos = await controlador.Delete(req.body)
     respuesta.success(req, res, 'Item eliminado satisfactoriamente', 200)
   }catch(err){
     next(err)

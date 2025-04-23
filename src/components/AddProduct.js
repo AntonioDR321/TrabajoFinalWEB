@@ -16,7 +16,6 @@ function AddProduct() {
   });
 
   const [productData, setProductData] = useState({
-    id: 0,
     nombre: '',
     marca: '',
     id_subcategoria: '',
@@ -25,11 +24,10 @@ function AddProduct() {
     id_estado: ''
   });
 
-  // Obtener listas de datos para los selects
   useEffect(() => {
     const fetchListas = async () => {
       try {
-        const headers = { 
+        const headers = {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         };
@@ -62,13 +60,24 @@ function AddProduct() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const { nombre, marca, id_subcategoria, id_pais, id_partida, id_estado } = productData;
+
+      const bodyData = {
+        nombre,
+        marca,
+        id_subcategoria,
+        id_pais,
+        id_partida,
+        id_estado
+      };
+
       const res = await fetch('http://localhost:4000/api/productos', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify(productData)
+        body: JSON.stringify(bodyData)
       });
       if (!res.ok) throw new Error('Error al guardar producto');
       navigate('/productos');
@@ -148,7 +157,7 @@ function AddProduct() {
             >
               <option value="">Seleccionar</option>
               {listas.partidas.map(pa => (
-                <option key={pa.id} value={pa.id}>{pa.numero_partida}</option>
+                <option key={pa.id} value={pa.id}>{pa.descripcion}</option>
               ))}
             </select>
           </div>
@@ -164,7 +173,7 @@ function AddProduct() {
             >
               <option value="">Seleccionar</option>
               {listas.estados.map(es => (
-                <option key={es.id} value={es.id}>{es.nombre_estado}</option>
+                <option key={es.id} value={es.id}>{es.nombre}</option>
               ))}
             </select>
           </div>

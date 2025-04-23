@@ -15,6 +15,7 @@ router.post('/', Add)
 async function All(req, res, next) {
   try{
     const todos = await controlador.All()
+    res.setHeader('Cache-Control', 'no-store');
   respuesta.success(req, res, todos, 200)
   }catch(err){
     next(err)

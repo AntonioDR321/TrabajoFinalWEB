@@ -1,4 +1,4 @@
-const TABLA = 'usuarios'
+const TABLA = 'tipo_evaluacion'
 module.exports = function (dbInyected){
   
   let db = dbInyected

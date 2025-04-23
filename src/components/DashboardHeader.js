@@ -44,13 +44,13 @@ function DashboardHeader() {
             <li><Link to="/productos" className={isActive('/productos') ? 'active' : ''}>Productos</Link></li>
             <li><Link to="/evaluaciones" className={isActive('/evaluaciones') ? 'active' : ''}>Evaluaciones</Link></li>
             <li><Link to="/usuarios" className={isActive('/usuarios') ? 'active' : ''}>Usuarios</Link></li>
-            <li><Link to="/historial" className={isActive('/historial') ? 'active' : ''}>Historial</Link></li>
           </ul>
         </nav>
         <div className="user-profile">
           <Link to="/profile">
             <UserIcon className="user-icon" />
           </Link>
+          <button onClick={handleLogout}>Cerrar sesión</button>
         </div>
       </div>
     </header>

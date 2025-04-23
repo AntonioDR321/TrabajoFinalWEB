@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import './Users.css';
 import { ReactComponent as SearchIcon } from '../assets/search-icon.svg';
 
@@ -9,24 +8,43 @@ const roles = {
   3: 'Supervisor'
 };
 
+const estados = {
+  1: 'Activo',
+  2: 'Inactivo',
+  3: 'Suspendido'
+};
+
 function Users() {
   const [searchTerm, setSearchTerm] = useState('');
   const [users, setUsers] = useState([]);
-  const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`${process.env.REACT_APP_API_URL}/api/usuarios`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
-      }
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data.body)) {
+    const fetchUsers = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`http://localhost:4000/api/usuarios`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        const data = await response.json();
+        console.log('Respuesta del backend:', data);
+
+        if (Array.isArray(data)) {
+          setUsers(data);
+        } else if (Array.isArray(data.body)) {
           setUsers(data.body);
+        }        
+        else {
+          console.error('La respuesta de usuarios no es un array:', data.body);
         }
-      })
-      .catch(err => console.error('Error al obtener usuarios:', err));
+      } catch (err) {
+        console.error('Error al obtener usuarios:', err);
+      }
+    };
+
+    fetchUsers();
   }, []);
 
   const handleSearch = (e) => {
@@ -58,21 +76,29 @@ function Users() {
           <table className="users-table">
             <thead>
               <tr>
-                <th>Usuarios</th>
+                <th>Nombre</th>
                 <th>Correo electrónico</th>
                 <th>Rol</th>
                 <th>Estado</th>
               </tr>
             </thead>
             <tbody>
-              {filteredUsers.map((user, index) => (
-                <tr key={index}>
-                  <td>{`${user.nombre} ${user.apellido}`}</td>
-                  <td>{user.correo}</td>
-                  <td>{roles[user.id_rol] || 'Desconocido'}</td>
-                  <td>{user.estado}</td>
+              {filteredUsers.length > 0 ? (
+                filteredUsers.map((user, index) => (
+                  <tr key={index}>
+                    <td>{`${user.nombre} ${user.apellido}`}</td>
+                    <td>{user.correo}</td>
+                    <td>{roles[user.id_rol] || 'Desconocido'}</td>
+                    <td>{estados[user.estado] || 'Desconocido'}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="4" style={{ textAlign: 'center' }}>
+                    No se encontraron usuarios.
+                  </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>

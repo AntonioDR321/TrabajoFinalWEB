@@ -17,7 +17,7 @@ function Login() {
     e.preventDefault();
     setError('');
     setLoading(true);
-
+  
     try {
       const response = await fetch('http://localhost:4000/api/autenticacion/login', {
         method: 'POST',
@@ -26,17 +26,15 @@ function Login() {
         },
         body: JSON.stringify({ usuario, contraseña })
       });
-
+  
       if (!response.ok) {
         throw new Error('Correo o contraseña incorrectos');
       }
-
+  
       const data = await response.json();
-      localStorage.setItem('token', data.body); // ← token real
-      localStorage.setItem('user', usuario); // opcional
-
-      login({ usuario, token: data.body });
-
+  
+      login({ ...data.usuario, token: data.body });
+  
       navigate('/dashboard');
     } catch (err) {
       setError(err.message);
@@ -44,7 +42,7 @@ function Login() {
       setLoading(false);
     }
   };
-
+  
   return (
     <div className="login-container">
       <div className="login-card">

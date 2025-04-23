@@ -13,19 +13,41 @@ function Evaluations() {
     const fetchEvaluations = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:4000/api/evaluaciones', {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-        });
+        const headers = {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        };
 
-        if (!response.ok) {
-          throw new Error('Error al obtener las evaluaciones');
+        // Fetch en paralelo
+        const [evalRes, prodRes, userRes] = await Promise.all([
+          fetch('http://localhost:4000/api/evaluaciones', { headers }),
+          fetch('http://localhost:4000/api/productos',    { headers }),
+          fetch('http://localhost:4000/api/usuarios',     { headers })
+        ]);
+
+        if (!evalRes.ok || !prodRes.ok || !userRes.ok) {
+          throw new Error('Error al obtener datos');
         }
 
-        const data = await response.json();
-        setEvaluations(data.body);
+        const [{ body: evals }, { body: prods }, { body: users }] =
+          await Promise.all([evalRes.json(), prodRes.json(), userRes.json()]);
+
+        const productById = Object.fromEntries(prods.map(p => [p.id, p]));
+        const userById    = Object.fromEntries(users.map(u => [u.id, u]));
+
+        const enriched = evals.map(e => {
+          const producto = productById[e.id_producto];
+          const usuario  = userById[e.id_usuario];
+
+          return {
+            ...e,
+            producto: producto?.nombre || '—',
+            usuario: usuario ? `${usuario.nombre} ${usuario.apellido}` : '—',
+            fecha_evaluacion: e.fecha_evaluacion?.substring(0, 10) || '—'
+          };
+        });
+
+        setEvaluations(enriched);
       } catch (err) {
         console.error(err);
       }
@@ -34,32 +56,26 @@ function Evaluations() {
     fetchEvaluations();
   }, []);
 
-  const handleSearch = (e) => {
-    setSearchTerm(e.target.value);
-  };
+  const handleSearch = (e) => setSearchTerm(e.target.value);
 
-  const handleViewEvaluation = (id) => {
-    navigate(`/evaluaciones/${id}`);
-  };
+  // Aquí pasamos { from: 'list' } para que EvaluationDetail sepa que viene de la lista
+  const handleViewEvaluation = (id) =>
+    navigate(`/evaluaciones/${id}`, { state: { from: 'list' } });
 
   const tipoEvaluacion = (id) => {
     switch (id) {
-      case 1:
-        return 'Sensorial';
-      case 2:
-        return 'Microbiológica';
-      case 3:
-        return 'Nutricional';
-      default:
-        return 'Desconocido';
+      case 1: return 'Sensorial';
+      case 2: return 'Microbiológica';
+      case 3: return 'Nutricional';
+      default: return 'Desconocido';
     }
   };
 
   const filteredEvaluations = evaluations.filter((evaluation) =>
-    evaluation.id.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+    evaluation.id.toString().includes(searchTerm.toLowerCase()) ||
     evaluation.producto?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     evaluation.usuario?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    evaluation.tipo_evaluacion?.toLowerCase().includes(searchTerm.toLowerCase())
+    tipoEvaluacion(evaluation.id_tipo_evaluacion).toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
